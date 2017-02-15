@@ -1,6 +1,10 @@
+rem Primera versión: 1.2
+rem Importa: csv y json
+rem Los json diferencia si inician con array [ o no {
 @echo off
 title ® Importar
 
+:reiniciarPrograma
 rem Inicio del programa
 set errorFichero=nada
 set verFicheros=no
@@ -43,6 +47,8 @@ if %errorFichero% equ nada (
 	echo ÌÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼
 )
 
+rem pruebas for
+
 rem errores: muestra error
 if %errorFichero% equ ficheroNoEncontrado (
 	echo ³ %mensaje%
@@ -53,6 +59,21 @@ if %errorFichero% equ ficheroNoEncontrado (
 	echo ³ Necesitas un fichero para importar
 	echo ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 	set /P fichero= ÀÄÄÄ¯ 
+)
+
+rem No quiere funcionar correctamente los mierda if y lo pongo así
+if exist "%fichero%" (
+	set /P archivojson=< %fichero%
+)
+
+if exist "%fichero%.json" (
+	set /P archivojson=< "%fichero%.json"
+)
+rem FICHERO VACIO
+if "%archivojson:~0,1%" equ "[" (
+set conArray=si
+) else (
+set conArray=no
 )
 
 if "%fichero%" equ "0" (
@@ -162,8 +183,12 @@ echo ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 echo.&echo.
 
 if "%fichero:~-4%" equ "json" (
-	rem Importando en json
-	mongoimport -d "%baseDatos%" --collection "%coleccion%" "%fichero%" --drop --stopOnError
+	
+	if %conArray% equ no (
+		mongoimport -d "%baseDatos%" --collection "%coleccion%" "%fichero%" --drop --stopOnError
+	) else (
+		mongoimport -d "%baseDatos%" --collection "%coleccion%" "%fichero%" --drop --stopOnError --jsonArray
+	)
 
 rem CSV
 ) else if "%fichero:~-3%" equ "csv" (
@@ -178,10 +203,10 @@ echo.&echo.
 echo ÉÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ»
 echo º   Terminado   º
 echo ÌÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼
-echo ³ Pulse una tecla para finalizar . . . Ú
+echo ³ Pulse una tecla para reiniciar . . . Ú
 echo ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 pause >nul
-exit
+goto reiniciarPrograma
 
 
 rem ERRORES
